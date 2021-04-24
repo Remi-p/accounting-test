@@ -1,7 +1,7 @@
 {
-  "name": "validations-playground",
+  "name": "accounting",
   "version": "0.1.0",
-  "description": "Demonstrates tests, CI & validations",
+  "description": "Technical test",
   "author": "Rémi Perrot",
   "license": "MIT",
   "scripts": {

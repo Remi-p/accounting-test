@@ -1,4 +1,4 @@
-# Validations Playground
+# Accounting technical test
 
 ![Building, linting, testing](https://github.com/Remi-p/validations-playground/workflows/Building,%20linting,%20testing/badge.svg)
 
