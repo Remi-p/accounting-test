@@ -1,13 +1,11 @@
 import express from 'express';
 
-import { diamondMaker } from './services/diamondMaker';
-
 const PORT = 8080;
 
 export const app = express();
 
 app.get('/:size', function (req, res) {
-    res.send(diamondMaker(+req.params.size));
+    res.send();
 });
 
 app.listen(PORT);
