@@ -4,7 +4,7 @@ const PORT = 8080;
 
 export const app = express();
 
-app.get('/:size', function (req, res) {
+app.post('/movements/validation', function (req, res) {
     res.send();
 });
 
