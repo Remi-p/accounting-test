@@ -9,7 +9,7 @@
 
 ## Commit convention
 
-The [conventional commit format](https://conventionalcommits.org/) is used. This is ensured by [commitlint](https://github.com/conventional-changelog/commitlint), in the CI & at commit creation.
+The [gitmoji](https://gitmoji.dev/) guide is used for committing. You can install gitmoji cli globally and construct your commit messages with `gitmoji -c`.
 
 ## Execute tests
 
