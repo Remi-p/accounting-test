@@ -1,3 +1,4 @@
+import { startOfNextMonth } from '../../tests/helper/dateHelper';
 import { generateRandomMonthCheckPoint } from '../../tests/helper/monthCheckpoint';
 import { generateRandomTransaction } from '../../tests/helper/transaction';
 import { MonthCheckpoint, Transaction } from '../@types';
@@ -10,7 +11,10 @@ describe('transactions service', () => {
             {
                 transactions: [generateRandomTransaction({ amount: -10 })],
                 monthCheckPoints: [
-                    generateRandomMonthCheckPoint({ balance: -10 }),
+                    {
+                        balance: -10,
+                        date: startOfNextMonth,
+                    },
                 ],
             },
         ],
@@ -19,7 +23,10 @@ describe('transactions service', () => {
             {
                 transactions: [],
                 monthCheckPoints: [
-                    generateRandomMonthCheckPoint({ balance: 0 }),
+                    {
+                        balance: 0,
+                        date: startOfNextMonth,
+                    },
                 ],
             },
         ],
@@ -31,9 +38,7 @@ describe('transactions service', () => {
                     generateRandomTransaction({ amount: -5 }),
                     generateRandomTransaction({ amount: -10 }),
                 ],
-                monthCheckPoints: [
-                    generateRandomMonthCheckPoint({ balance: -5 }),
-                ],
+                monthCheckPoints: [{ balance: -5, date: startOfNextMonth }],
             },
         ],
         [
@@ -48,9 +53,7 @@ describe('transactions service', () => {
                         date: new Date('2019-01-01'),
                     }),
                 ],
-                monthCheckPoints: [
-                    generateRandomMonthCheckPoint({ balance: -5 }),
-                ],
+                monthCheckPoints: [{ balance: -5, date: startOfNextMonth }],
             },
         ],
         [
@@ -75,8 +78,8 @@ describe('transactions service', () => {
                     }),
                 ],
                 monthCheckPoints: [
-                    { balance: 5, date: new Date('2019-01-31') },
-                    { balance: -10, date: new Date('2020-02-29') },
+                    { balance: 5, date: new Date('2019-02-01') },
+                    { balance: -10, date: new Date('2020-03-01') },
                 ],
             },
         ],
@@ -104,7 +107,7 @@ describe('transactions service', () => {
         expect(
             TransactionsService.validate(
                 [generateRandomTransaction({ amount: 10 })],
-                [generateRandomMonthCheckPoint({ balance: -100 })]
+                [{ balance: -100, date: startOfNextMonth }]
             )
         ).toEqual({
             accepted: false,

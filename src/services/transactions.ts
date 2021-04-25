@@ -1,4 +1,5 @@
 import { MonthCheckpoint, Transaction } from '../@types';
+import { InvalidInputError } from '../errors';
 
 type OrganizedTransactions = {
     [key: string]: {
@@ -19,16 +20,25 @@ export class TransactionsService {
         const reasons: string[] = [];
 
         monthCheckpoints.forEach((monthCheckpoint) => {
+            if (!this.isFirstOfMonth(monthCheckpoint.date)) {
+                throw new InvalidInputError(
+                    `${monthCheckpoint.date} from checkpoints is not a first of month date`
+                );
+            }
             if (
                 !this.isTransactionsConsistentWithCheckpoint(
                     organizedTransactions,
                     monthCheckpoint
                 )
             ) {
-                const month = this.getMonthFromDate(monthCheckpoint.date);
+                const month = this.getPreviousMonthFromDate(
+                    monthCheckpoint.date
+                );
+                const computedBalance =
+                    organizedTransactions[month]?.computedBalance || 0;
                 accepted = false;
                 reasons.push(
-                    `${month}: computedValue ${organizedTransactions[month].computedBalance} mismatch balance ${monthCheckpoint.balance}`
+                    `${month}: computedValue ${computedBalance} mismatch balance ${monthCheckpoint.balance}`
                 );
             }
         });
@@ -63,7 +73,7 @@ export class TransactionsService {
         organizedTransactions: OrganizedTransactions,
         checkpoint: MonthCheckpoint
     ): boolean {
-        const month = this.getMonthFromDate(checkpoint.date);
+        const month = this.getPreviousMonthFromDate(checkpoint.date);
 
         if (!organizedTransactions[month] && checkpoint.balance === 0) {
             return true;
@@ -77,8 +87,23 @@ export class TransactionsService {
         return false;
     }
 
+    private static isFirstOfMonth(inputDate: Date) {
+        const date = new Date(inputDate);
+        return date.getDate() === 1;
+    }
+
     private static getMonthFromDate(inputDate: Date) {
         const date = new Date(inputDate);
         return `${date.getFullYear()}-${date.getMonth() + 1}`;
+    }
+
+    private static getPreviousMonthFromDate(inputDate: Date) {
+        const date = new Date(inputDate);
+        const previousMonthDate = new Date(
+            Date.UTC(date.getFullYear(), date.getMonth() - 1, 1)
+        );
+        return `${previousMonthDate.getFullYear()}-${
+            previousMonthDate.getMonth() + 1
+        }`;
     }
 }

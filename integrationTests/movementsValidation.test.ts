@@ -1,6 +1,7 @@
 import request from 'supertest';
 
 import { app } from '../src/server';
+import { startOfNextMonth } from '../tests/helper/dateHelper';
 import { generateRandomMonthCheckPoint } from '../tests/helper/monthCheckpoint';
 import { generateRandomTransaction } from '../tests/helper/transaction';
 
@@ -10,7 +11,7 @@ describe('Server', () => {
             .post('/movements/validation')
             .send({
                 movements: [generateRandomTransaction({ amount: -10 })],
-                balances: [generateRandomMonthCheckPoint({ balance: -10 })],
+                balances: [{ balance: -10, date: startOfNextMonth }],
             })
             .expect(200)
             .then((response) => {
@@ -23,7 +24,7 @@ describe('Server', () => {
             .post('/movements/validation')
             .send({
                 movements: [generateRandomTransaction({ amount: 10 })],
-                balances: [generateRandomMonthCheckPoint({ balance: -100 })],
+                balances: [{ balance: -100, date: startOfNextMonth }],
             })
             .expect(200)
             .then((response) => {
@@ -48,6 +49,20 @@ describe('Server', () => {
         await request(app)
             .post('/movements/validation')
             .send({
+                movements: [generateRandomTransaction()],
+            })
+            .expect(415);
+    });
+
+    it('should reject a checkpoint with a date being not the first of a month', async () => {
+        await request(app)
+            .post('/movements/validation')
+            .send({
+                balances: [
+                    generateRandomMonthCheckPoint({
+                        date: new Date('2021-01-15'),
+                    }),
+                ],
                 movements: [generateRandomTransaction()],
             })
             .expect(415);
