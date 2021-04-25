@@ -15,12 +15,38 @@ describe('transactions service', () => {
             },
         ],
         [
+            'no transaction',
+            {
+                transactions: [],
+                monthCheckPoints: [
+                    generateRandomMonthCheckPoint({ balance: 0 }),
+                ],
+            },
+        ],
+        [
             'multiple transactions',
             {
                 transactions: [
                     generateRandomTransaction({ amount: 10 }),
                     generateRandomTransaction({ amount: -5 }),
                     generateRandomTransaction({ amount: -10 }),
+                ],
+                monthCheckPoints: [
+                    generateRandomMonthCheckPoint({ balance: -5 }),
+                ],
+            },
+        ],
+        [
+            'multiple transactions with some not in the checked month',
+            {
+                transactions: [
+                    generateRandomTransaction({ amount: 10 }),
+                    generateRandomTransaction({ amount: -5 }),
+                    generateRandomTransaction({ amount: -10 }),
+                    generateRandomTransaction({
+                        amount: -10,
+                        date: new Date('2019-01-01'),
+                    }),
                 ],
                 monthCheckPoints: [
                     generateRandomMonthCheckPoint({ balance: -5 }),
@@ -41,7 +67,7 @@ describe('transactions service', () => {
         ) => {
             expect(
                 TransactionsService.validate(transactions, monthCheckPoints)
-            ).toBe('Accepted');
+            ).toMatchObject({ accepted: true });
         }
     );
 
@@ -51,6 +77,9 @@ describe('transactions service', () => {
                 [generateRandomTransaction({ amount: 10 })],
                 [generateRandomMonthCheckPoint({ balance: -100 })]
             )
-        ).toBe('Refused');
+        ).toEqual({
+            accepted: false,
+            reasons: ['2021-3: computedValue 10 mismatch balance -100'],
+        });
     });
 });

@@ -28,6 +28,9 @@ describe('Server', () => {
             .expect(200)
             .then((response) => {
                 expect(response.body.message).toBe('Refused');
+                expect(response.body.reasons).toEqual([
+                    '2021-3: computedValue 10 mismatch balance -100',
+                ]);
             });
     });
 
