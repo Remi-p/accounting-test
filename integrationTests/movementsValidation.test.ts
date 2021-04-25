@@ -27,9 +27,12 @@ describe('Server', () => {
             })
             .expect(200)
             .then((response) => {
+                const today = new Date();
                 expect(response.body.message).toBe('Refused');
                 expect(response.body.reasons).toEqual([
-                    '2021-3: computedValue 10 mismatch balance -100',
+                    `${today.getFullYear()}-${
+                        today.getMonth() + 1
+                    }: computedValue 10 mismatch balance -100`,
                 ]);
             });
     });

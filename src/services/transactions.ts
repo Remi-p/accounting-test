@@ -79,6 +79,6 @@ export class TransactionsService {
 
     private static getMonthFromDate(inputDate: Date) {
         const date = new Date(inputDate);
-        return `${date.getFullYear()}-${date.getMonth()}`;
+        return `${date.getFullYear()}-${date.getMonth() + 1}`;
     }
 }

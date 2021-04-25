@@ -72,6 +72,8 @@ describe('transactions service', () => {
     );
 
     it('should reject when amount & balance does not match with 1-sized-arrays', () => {
+        const today = new Date();
+
         expect(
             TransactionsService.validate(
                 [generateRandomTransaction({ amount: 10 })],
@@ -79,7 +81,11 @@ describe('transactions service', () => {
             )
         ).toEqual({
             accepted: false,
-            reasons: ['2021-3: computedValue 10 mismatch balance -100'],
+            reasons: [
+                `${today.getFullYear()}-${
+                    today.getMonth() + 1
+                }: computedValue 10 mismatch balance -100`,
+            ],
         });
     });
 });
