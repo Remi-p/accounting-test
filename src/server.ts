@@ -1,5 +1,5 @@
 import express from 'express';
-import { InvalidInputError } from './errors/InvalidInput';
+import { InvalidInputError } from './errors';
 import { TransactionsService } from './services/transactions';
 
 const PORT = 8080;

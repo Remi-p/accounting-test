@@ -1,1 +1,1 @@
-export * from './InvalidBalance';
+export * from './InvalidInput';

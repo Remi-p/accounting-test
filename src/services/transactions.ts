@@ -1,5 +1,4 @@
 import { MonthCheckpoint, Transaction } from '../@types';
-import { InvalidBalanceError } from '../errors';
 
 type OrganizedTransactions = {
     [key: string]: {
