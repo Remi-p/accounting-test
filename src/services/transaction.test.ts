@@ -1,9 +1,9 @@
-import { validation } from './transactions';
+import { TransactionsService } from './transactions';
 
 describe('transactions service', () => {
     it('should answer with a correct message for 1-size arrays', () => {
         expect(
-            validation(
+            TransactionsService.validate(
                 [
                     {
                         amount: 10,
@@ -19,7 +19,7 @@ describe('transactions service', () => {
 
     it('should throw an error when amount & balance does not match', () => {
         expect(() =>
-            validation(
+            TransactionsService.validate(
                 [
                     {
                         amount: 10,
