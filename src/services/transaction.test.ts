@@ -53,6 +53,33 @@ describe('transactions service', () => {
                 ],
             },
         ],
+        [
+            'multiple transactions, multiple checked months',
+            {
+                transactions: [
+                    generateRandomTransaction({
+                        amount: 10,
+                        date: new Date('2019-01-01'),
+                    }),
+                    generateRandomTransaction({
+                        amount: -5,
+                        date: new Date('2019-01-05'),
+                    }),
+                    generateRandomTransaction({
+                        amount: -10,
+                        date: new Date('2020-02-01'),
+                    }),
+                    generateRandomTransaction({
+                        amount: -10,
+                        date: new Date('2021-03-01'),
+                    }),
+                ],
+                monthCheckPoints: [
+                    { balance: 5, date: new Date('2019-01-31') },
+                    { balance: -10, date: new Date('2020-02-29') },
+                ],
+            },
+        ],
     ])(
         'should answer with a correct message when valid - %s',
         (
