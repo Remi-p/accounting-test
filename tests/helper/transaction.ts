@@ -2,7 +2,7 @@ import { Transaction } from '../../src/@types';
 import { randomInt } from './randomIntGenerator';
 
 export const generateRandomTransaction = (
-    partial: Partial<Transaction>
+    partial: Partial<Transaction> = {}
 ): Transaction => {
     const generatedTransaction: Transaction = {
         id: randomInt(1, 100),

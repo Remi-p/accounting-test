@@ -24,4 +24,20 @@ describe('Server', () => {
             })
             .expect(422);
     });
+
+    it('should reject an incorrectly formed request', async () => {
+        await request(app)
+            .post('/movements/validation')
+            .send({
+                balances: [generateRandomMonthCheckPoint()],
+            })
+            .expect(415);
+
+        await request(app)
+            .post('/movements/validation')
+            .send({
+                movements: [generateRandomTransaction()],
+            })
+            .expect(415);
+    });
 });
