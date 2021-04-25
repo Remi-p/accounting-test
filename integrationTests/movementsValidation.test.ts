@@ -1,21 +1,16 @@
 import request from 'supertest';
 
 import { app } from '../src/server';
+import { generateRandomMonthCheckPoint } from '../tests/helper/monthCheckpoint';
+import { generateRandomTransaction } from '../tests/helper/transaction';
 
 describe('Server', () => {
     it('should anwser something', () => {
         return request(app)
             .post('/movements/validation')
             .send({
-                movements: [
-                    {
-                        amount: 10,
-                        id: 1,
-                        date: new Date(),
-                        wording: 'Buying coffee',
-                    },
-                ],
-                balances: [{ date: new Date(), balance: -10 }],
+                movements: [generateRandomTransaction({ amount: 10 })],
+                balances: [generateRandomMonthCheckPoint({ balance: -10 })],
             })
             .expect(200);
     });
@@ -24,15 +19,8 @@ describe('Server', () => {
         return request(app)
             .post('/movements/validation')
             .send({
-                movements: [
-                    {
-                        amount: 10,
-                        id: 1,
-                        date: new Date(),
-                        wording: 'Buying coffee',
-                    },
-                ],
-                balances: [{ date: new Date(), balance: -100 }],
+                movements: [generateRandomTransaction({ amount: 10 })],
+                balances: [generateRandomMonthCheckPoint({ balance: -100 })],
             })
             .expect(422);
     });
