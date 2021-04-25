@@ -1,11 +1,13 @@
 import express from 'express';
+import { validation } from './services/transactions';
 
 const PORT = 8080;
 
 export const app = express();
+app.use(express.json());
 
 app.post('/movements/validation', function (req, res) {
-    res.send();
+    res.send(validation(req.body.movements, req.body.balances));
 });
 
 app.listen(PORT);
