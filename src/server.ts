@@ -11,9 +11,12 @@ app.post('/movements/validation', function (req, res) {
     if (!req.body.movements || !req.body.balances) {
         throw new InvalidInputError();
     }
-    res.send(
-        TransactionsService.validate(req.body.movements, req.body.balances)
-    );
+    res.send({
+        message: TransactionsService.validate(
+            req.body.movements,
+            req.body.balances
+        ),
+    });
 });
 
 app.listen(PORT);

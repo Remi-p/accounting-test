@@ -9,10 +9,13 @@ describe('Server', () => {
         return request(app)
             .post('/movements/validation')
             .send({
-                movements: [generateRandomTransaction({ amount: 10 })],
+                movements: [generateRandomTransaction({ amount: -10 })],
                 balances: [generateRandomMonthCheckPoint({ balance: -10 })],
             })
-            .expect(200);
+            .expect(200)
+            .then((response) => {
+                expect(response.body.message).toBe('Accepted');
+            });
     });
 
     it('should reject an incorrect balance', () => {
@@ -22,7 +25,10 @@ describe('Server', () => {
                 movements: [generateRandomTransaction({ amount: 10 })],
                 balances: [generateRandomMonthCheckPoint({ balance: -100 })],
             })
-            .expect(422);
+            .expect(200)
+            .then((response) => {
+                expect(response.body.message).toBe('Refused');
+            });
     });
 
     it('should reject an incorrectly formed request', async () => {

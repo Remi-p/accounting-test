@@ -6,9 +6,13 @@ export class TransactionsService {
         transactions: Transaction[],
         monthCheckpoints: MonthCheckpoint[]
     ): string => {
-        if (-transactions[0].amount === monthCheckpoints[0].balance) {
+        const totalTransactionsAmount = transactions.reduce(
+            (acc, transaction) => acc + transaction.amount,
+            0
+        );
+        if (totalTransactionsAmount === monthCheckpoints[0].balance) {
             return 'Accepted';
         }
-        throw new InvalidBalanceError('An error was found');
+        return 'Refused';
     };
 }
