@@ -1,3 +1,3 @@
 import HttpErrors from 'http-errors';
 
-export class InvalidInputError extends HttpErrors.UnsupportedMediaType {}
+export class InvalidInputError extends HttpErrors.UnprocessableEntity {}

@@ -44,14 +44,14 @@ describe('Server', () => {
             .send({
                 balances: [generateRandomMonthCheckPoint()],
             })
-            .expect(415);
+            .expect(422);
 
         await request(app)
             .post('/movements/validation')
             .send({
                 movements: [generateRandomTransaction()],
             })
-            .expect(415);
+            .expect(422);
     });
 
     it('should reject a checkpoint with a date being not the first of a month', async () => {
@@ -65,6 +65,6 @@ describe('Server', () => {
                 ],
                 movements: [generateRandomTransaction()],
             })
-            .expect(415);
+            .expect(422);
     });
 });
