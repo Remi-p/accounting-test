@@ -8,12 +8,13 @@ type OrganizedTransactions = {
     };
 };
 
+type OrganizedCheckpointsMonth = {
+    monthDifference?: number;
+    startOfMonthCheckpoint?: MonthCheckpoint;
+    endOfMonthCheckpoint?: MonthCheckpoint;
+};
 type OrganizedCheckpoints = {
-    [key: string]: {
-        monthDifference?: number;
-        startOfMonthCheckpoint?: MonthCheckpoint;
-        endOfMonthCheckpoint?: MonthCheckpoint;
-    };
+    [key: string]: OrganizedCheckpointsMonth;
 };
 
 export class TransactionsService {
@@ -33,7 +34,7 @@ export class TransactionsService {
         Object.keys(organizedCheckpoints).forEach((month) => {
             const balance = organizedCheckpoints[month]!.monthDifference!;
             if (
-                !this.isTransactionsConsistentWithCheckpoint(
+                !this.isTransactionsConsistentWithBalance(
                     organizedTransactions,
                     month,
                     balance
@@ -61,17 +62,33 @@ export class TransactionsService {
 
         transactions.forEach((transaction) => {
             const month = this.getMonthFromDate(transaction.date);
-            if (!organizedTransactions[month]) {
-                organizedTransactions[month] = {
-                    computedBalance: 0,
-                    transactions: [],
-                };
-            }
-            organizedTransactions[month].computedBalance += transaction.amount;
-            organizedTransactions[month].transactions.push(transaction);
+
+            organizedTransactions[
+                month
+            ] = this.completeOrganizedTransactionsMonth(
+                organizedTransactions,
+                month,
+                transaction
+            );
         });
 
         return organizedTransactions;
+    }
+
+    private static completeOrganizedTransactionsMonth(
+        organizedTransactions: OrganizedTransactions,
+        month: string,
+        transaction: Transaction
+    ) {
+        if (!organizedTransactions[month]) {
+            organizedTransactions[month] = {
+                computedBalance: 0,
+                transactions: [],
+            };
+        }
+        organizedTransactions[month].computedBalance += transaction.amount;
+        organizedTransactions[month].transactions.push(transaction);
+        return organizedTransactions[month];
     }
 
     private static organizeCheckpointsByMonth(
@@ -88,26 +105,31 @@ export class TransactionsService {
             const nextMonth = this.getMonthFromDate(checkpoint.date);
             const currentMonth = this.getPreviousMonthFromDate(checkpoint.date);
 
-            if (!organizedCheckpoints[nextMonth]) {
-                organizedCheckpoints[nextMonth] = {};
-            }
-            organizedCheckpoints[nextMonth].startOfMonthCheckpoint = checkpoint;
-            if (!organizedCheckpoints[currentMonth]) {
-                organizedCheckpoints[currentMonth] = {};
-            }
-            organizedCheckpoints[
-                currentMonth
-            ].endOfMonthCheckpoint = checkpoint;
+            const {
+                nextMonth: nextOrganizedMonth,
+                currentMonth: currentOrganizedMonth,
+            } = this.completeOrganizedCheckpointsMonth(
+                organizedCheckpoints,
+                currentMonth,
+                nextMonth,
+                checkpoint
+            );
+
+            organizedCheckpoints[nextMonth] = nextOrganizedMonth;
+            organizedCheckpoints[currentMonth] = currentOrganizedMonth;
         });
 
         Object.keys(organizedCheckpoints).forEach((month) => {
+            const organizedCheckpointsMonth = organizedCheckpoints[month];
+
             if (
-                organizedCheckpoints[month].endOfMonthCheckpoint &&
-                organizedCheckpoints[month].startOfMonthCheckpoint
+                this.isOrganizedCheckpointsMonthComplete(
+                    organizedCheckpointsMonth
+                )
             ) {
-                organizedCheckpoints[month].monthDifference =
-                    organizedCheckpoints[month].endOfMonthCheckpoint!.balance -
-                    organizedCheckpoints[month].startOfMonthCheckpoint!.balance;
+                organizedCheckpointsMonth.monthDifference =
+                    organizedCheckpointsMonth.endOfMonthCheckpoint!.balance -
+                    organizedCheckpointsMonth.startOfMonthCheckpoint!.balance;
             } else {
                 delete organizedCheckpoints[month];
             }
@@ -116,7 +138,36 @@ export class TransactionsService {
         return organizedCheckpoints;
     }
 
-    private static isTransactionsConsistentWithCheckpoint(
+    private static completeOrganizedCheckpointsMonth(
+        organizedCheckpoints: OrganizedCheckpoints,
+        currentMonth: string,
+        nextMonth: string,
+        checkpoint: MonthCheckpoint
+    ) {
+        const nextOrganizedMonth: OrganizedCheckpointsMonth =
+            organizedCheckpoints[nextMonth] || {};
+        const currentOrganizedMonth: OrganizedCheckpointsMonth =
+            organizedCheckpoints[currentMonth] || {};
+
+        nextOrganizedMonth.startOfMonthCheckpoint = checkpoint;
+        currentOrganizedMonth.endOfMonthCheckpoint = checkpoint;
+
+        return {
+            nextMonth: nextOrganizedMonth,
+            currentMonth: currentOrganizedMonth,
+        };
+    }
+
+    private static isOrganizedCheckpointsMonthComplete(
+        organizedCheckpoints: OrganizedCheckpointsMonth
+    ) {
+        return (
+            organizedCheckpoints.endOfMonthCheckpoint &&
+            organizedCheckpoints.startOfMonthCheckpoint
+        );
+    }
+
+    private static isTransactionsConsistentWithBalance(
         organizedTransactions: OrganizedTransactions,
         month: string,
         balance: number
