@@ -8,6 +8,14 @@ type OrganizedTransactions = {
     };
 };
 
+type OrganizedCheckpoints = {
+    [key: string]: {
+        monthDifference?: number;
+        startOfMonthCheckpoint?: MonthCheckpoint;
+        endOfMonthCheckpoint?: MonthCheckpoint;
+    };
+};
+
 export class TransactionsService {
     public static validate(
         transactions: Transaction[],
@@ -16,29 +24,26 @@ export class TransactionsService {
         const organizedTransactions = this.organizeTransactionsByMonth(
             transactions
         );
+        const organizedCheckpoints = this.organizeCheckpointsByMonth(
+            monthCheckpoints
+        );
         let accepted = true;
         const reasons: string[] = [];
 
-        monthCheckpoints.forEach((monthCheckpoint) => {
-            if (!this.isFirstOfMonth(monthCheckpoint.date)) {
-                throw new InvalidInputError(
-                    `${monthCheckpoint.date} from checkpoints is not a first of month date`
-                );
-            }
+        Object.keys(organizedCheckpoints).forEach((month) => {
+            const balance = organizedCheckpoints[month]!.monthDifference!;
             if (
                 !this.isTransactionsConsistentWithCheckpoint(
                     organizedTransactions,
-                    monthCheckpoint
+                    month,
+                    balance
                 )
             ) {
-                const month = this.getPreviousMonthFromDate(
-                    monthCheckpoint.date
-                );
                 const computedBalance =
                     organizedTransactions[month]?.computedBalance || 0;
                 accepted = false;
                 reasons.push(
-                    `${month}: computedValue ${computedBalance} mismatch balance ${monthCheckpoint.balance}`
+                    `${month}: computedValue ${computedBalance} mismatch balance ${balance}`
                 );
             }
         });
@@ -69,18 +74,65 @@ export class TransactionsService {
         return organizedTransactions;
     }
 
+    private static organizeCheckpointsByMonth(
+        checkpoints: MonthCheckpoint[]
+    ): OrganizedCheckpoints {
+        const organizedCheckpoints: OrganizedCheckpoints = {};
+
+        checkpoints.forEach((checkpoint) => {
+            if (!this.isFirstOfMonth(checkpoint.date)) {
+                throw new InvalidInputError(
+                    `${checkpoint.date} from checkpoints is not a first of month date`
+                );
+            }
+            const nextMonth = this.getMonthFromDate(checkpoint.date);
+            const currentMonth = this.getPreviousMonthFromDate(checkpoint.date);
+
+            if (!organizedCheckpoints[nextMonth]) {
+                organizedCheckpoints[nextMonth] = {};
+            }
+            organizedCheckpoints[nextMonth].startOfMonthCheckpoint = checkpoint;
+            if (!organizedCheckpoints[currentMonth]) {
+                organizedCheckpoints[currentMonth] = {};
+            }
+            organizedCheckpoints[
+                currentMonth
+            ].endOfMonthCheckpoint = checkpoint;
+        });
+
+        Object.keys(organizedCheckpoints).forEach((month) => {
+            if (
+                organizedCheckpoints[month].endOfMonthCheckpoint &&
+                organizedCheckpoints[month].startOfMonthCheckpoint
+            ) {
+                organizedCheckpoints[month].monthDifference =
+                    organizedCheckpoints[month].endOfMonthCheckpoint!.balance -
+                    organizedCheckpoints[month].startOfMonthCheckpoint!.balance;
+            } else {
+                delete organizedCheckpoints[month];
+            }
+        });
+
+        return organizedCheckpoints;
+    }
+
     private static isTransactionsConsistentWithCheckpoint(
         organizedTransactions: OrganizedTransactions,
-        checkpoint: MonthCheckpoint
+        month: string,
+        balance: number
     ): boolean {
-        const month = this.getPreviousMonthFromDate(checkpoint.date);
-
-        if (!organizedTransactions[month] && checkpoint.balance === 0) {
+        console.log('month:', month);
+        console.log(
+            'organizedTransactions[month]:',
+            organizedTransactions[month]
+        );
+        console.log('balance:', balance);
+        if (!organizedTransactions[month] && balance === 0) {
             return true;
         }
         if (
             organizedTransactions[month] &&
-            checkpoint.balance === organizedTransactions[month].computedBalance
+            balance === organizedTransactions[month].computedBalance
         ) {
             return true;
         }

@@ -1,7 +1,7 @@
 import request from 'supertest';
 
 import { app } from '../src/server';
-import { startOfNextMonth } from '../tests/helper/dateHelper';
+import { startOfNextMonth, startOfThisMonth } from '../tests/helper/dateHelper';
 import { generateRandomMonthCheckPoint } from '../tests/helper/monthCheckpoint';
 import { generateRandomTransaction } from '../tests/helper/transaction';
 
@@ -11,7 +11,10 @@ describe('Server', () => {
             .post('/movements/validation')
             .send({
                 movements: [generateRandomTransaction({ amount: -10 })],
-                balances: [{ balance: -10, date: startOfNextMonth }],
+                balances: [
+                    { balance: 100, date: startOfThisMonth },
+                    { balance: 90, date: startOfNextMonth },
+                ],
             })
             .expect(200)
             .then((response) => {
@@ -24,7 +27,10 @@ describe('Server', () => {
             .post('/movements/validation')
             .send({
                 movements: [generateRandomTransaction({ amount: 10 })],
-                balances: [{ balance: -100, date: startOfNextMonth }],
+                balances: [
+                    { balance: 1000, date: startOfThisMonth },
+                    { balance: 900, date: startOfNextMonth },
+                ],
             })
             .expect(200)
             .then((response) => {
