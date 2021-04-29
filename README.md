@@ -43,6 +43,12 @@ I took the opportunity of this exercice for testing `gitmoji`/
 1. Install `yarn`
 2. Inside this repository, launch the following command: `yarn`.
 
+## Usage
+
+Use `yarn start`. Port is 8080.
+
+The only available endpoint is `/movements/validation`. See tests files (`integrationTests/movementsValidation.test.ts` for instance) for how to use.
+
 ## Commit convention
 
 The [gitmoji](https://gitmoji.dev/) guide is used for committing. You can install gitmoji cli globally and construct your commit messages with `gitmoji -c`.
