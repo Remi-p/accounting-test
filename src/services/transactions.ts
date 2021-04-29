@@ -21,7 +21,7 @@ export class TransactionsService {
     public static validate(
         transactions: Transaction[],
         monthCheckpoints: MonthCheckpoint[]
-    ): { accepted: boolean; reasons: string[] } {
+    ): { accepted: boolean; reasons: string[]; analysis: string[] } {
         const organizedTransactions = this.organizeTransactionsByMonth(
             transactions
         );
@@ -30,6 +30,7 @@ export class TransactionsService {
         );
         let accepted = true;
         const reasons: string[] = [];
+        const analysis: string[] = [];
 
         Object.keys(organizedCheckpoints).forEach((month) => {
             const balance = organizedCheckpoints[month]!.monthDifference!;
@@ -46,12 +47,21 @@ export class TransactionsService {
                 reasons.push(
                     `${month}: computedValue ${computedBalance} mismatch balance ${balance}`
                 );
+
+                analysis.push(
+                    ...this.computeAnalysis(
+                        organizedTransactions,
+                        month,
+                        balance
+                    )
+                );
             }
         });
 
         return {
             accepted,
             reasons,
+            analysis,
         };
     }
 
@@ -182,6 +192,28 @@ export class TransactionsService {
             return true;
         }
         return false;
+    }
+
+    private static computeAnalysis(
+        organizedTransactions: OrganizedTransactions,
+        month: string,
+        balance: number
+    ) {
+        const analysis: string[] = [];
+        // Search a transaction having exactly the difference between computedBalance
+        // & reality
+        const balanceDiff =
+            balance - organizedTransactions[month].computedBalance;
+
+        organizedTransactions[month].transactions.some((transaction) => {
+            if (-transaction.amount === balanceDiff) {
+                analysis.push(
+                    `${month}: transaction with amount ${transaction.amount} might be guilty`
+                );
+                return true;
+            }
+        });
+        return analysis;
     }
 
     private static isFirstOfMonth(inputDate: Date) {

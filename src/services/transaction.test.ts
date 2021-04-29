@@ -128,6 +128,37 @@ describe('transactions service', () => {
                     today.getMonth() + 1
                 }: computedValue 10 mismatch balance -100`,
             ],
+            analysis: [],
+        });
+    });
+
+    it('should extract a transaction being exactly the differences between checkpoints & transactions', () => {
+        const today = new Date();
+
+        expect(
+            TransactionsService.validate(
+                [
+                    generateRandomTransaction({ amount: 100 }),
+                    generateRandomTransaction({ amount: 100 }), // Duplicated transaction
+                    generateRandomTransaction({ amount: -400 }),
+                ],
+                [
+                    { balance: 0, date: startOfThisMonth },
+                    { balance: -300, date: startOfNextMonth },
+                ]
+            )
+        ).toEqual({
+            accepted: false,
+            reasons: [
+                `${today.getFullYear()}-${
+                    today.getMonth() + 1
+                }: computedValue -200 mismatch balance -300`,
+            ],
+            analysis: [
+                `${today.getFullYear()}-${
+                    today.getMonth() + 1
+                }: transaction with amount 100 might be guilty`,
+            ],
         });
     });
 });

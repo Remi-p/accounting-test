@@ -19,6 +19,7 @@ app.post('/movements/validation', function (req, res) {
     res.send({
         message: validationResult.accepted ? 'Accepted' : 'Refused',
         reasons: validationResult.reasons,
+        analysis: validationResult.analysis,
     });
 });
 
