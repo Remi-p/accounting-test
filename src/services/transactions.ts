@@ -121,12 +121,6 @@ export class TransactionsService {
         month: string,
         balance: number
     ): boolean {
-        console.log('month:', month);
-        console.log(
-            'organizedTransactions[month]:',
-            organizedTransactions[month]
-        );
-        console.log('balance:', balance);
         if (!organizedTransactions[month] && balance === 0) {
             return true;
         }
